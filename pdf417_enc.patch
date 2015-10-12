@@ -1,0 +1,11 @@
+--- pdf417_enc.c	Sun Mar  7 19:21:49 2004
++++ pdf417_enc.c.orig	Sun Mar  7 15:35:33 2004
+@@ -5037,7 +5037,7 @@
+ 
+ 	if ((op == NC) && (prev_op == NC) && (done == FALSE)) {
+ 
+-	    do_mode_latch(902);  /* --HP */
++
+ 	    done = TRUE;
+ 	    prev_op = NC;
+ 	}

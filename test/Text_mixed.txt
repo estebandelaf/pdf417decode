@@ -1,0 +1,7 @@
+TC "ab cdefghi jklmno pqrztuv"
+TC "ABCDEFGHIJLMNOPQRSTUVWXYZ"
+TC "0123456064654640048799712"
+TC "&,:#-$/+%*=^= &,:$^$%%%%%"
+TC "YFDXHJV IJII UIIUIU UUUUI"
+TC "5446766111001664648467467"
+TC "iuhgohu opoh po ppoo fred"

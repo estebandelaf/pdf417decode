@@ -1,0 +1,4 @@
+TC "ABC012ABCabcABC<@>"
+TC "abc012abcABCabc<@>"
+TC "012ABC012abc012<@>"
+TC "<@>012<@>ABC<@>abc"
