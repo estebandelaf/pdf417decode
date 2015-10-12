@@ -1,4 +1,8 @@
 Pdf417decode
+============
+
+This is a fork of the project available in
+<http://sourceforge.net/projects/pdf417decode>.
 
 Usage
 -----
@@ -19,7 +23,7 @@ The decoder accepts the following command line options:
      R-S error correction algorithm cannot correct certain errors
      introduced by the pbm image decoder, like the insertion of spurious
      codewords due to the same row being detected more than once).
-      
+
 
 Installation
 ------------
@@ -36,14 +40,14 @@ pdf417enc 3.1, a few of them came with the pdf417enc 3.1 distribution and
 one or two were found in the web.
 
 After the program has been compiled, a "make check" can be used to test
-the decoder. The command causes the program to decode all the images 
+the decoder. The command causes the program to decode all the images
 found in the test directory, dumping the information to the terminal.
 
 
 Notes
 -----
 
-- Your compiler needs to understand that "long long" is 64 bits (gcc does) 
+- Your compiler needs to understand that "long long" is 64 bits (gcc does)
   in order to compile it.
 
 - The decoder ignores Macro PDF and extended mode commands.
