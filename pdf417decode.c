@@ -2,32 +2,32 @@
 
    Pdf417decode can decode PDF417 barcode information from a pbm file.
 
-   Original software by Ian Goldberg, 
+   Original software by Ian Goldberg,
    Modified and updated by OOO S.  (ooosawaddee3@hotmail.com)
    Version 2.0 by Hector Peraza (peraza@uia.ua.ac.be)
 
-   Usage: To decode a pbm file "jac.pbm", do "./pdf417decode jac.pbm".  
+   Usage: To decode a pbm file "jac.pbm", do "./pdf417decode jac.pbm".
    The file is written to stdout.
 
    See the accompaining Readme.txt file for information about the
    command line options.
-   
+
    Notes:
 
-   - Your compiler needs to understand that "long long" is 64 bits (gcc does) 
+   - Your compiler needs to understand that "long long" is 64 bits (gcc does)
      in order to compile it.
 
-   If you can debug or modify this software to work better than now 
-   (like add error correction or modify for any operation system) 
+   If you can debug or modify this software to work better than now
+   (like add error correction or modify for any operation system)
    you can cantact OOO S.  (ooosawaddee3@hotmail.com)
    I will annouce your name in the next modify rev.
 
    For specification of pdf417 you can see at
-      http://www.geocities.com/ooosawaddee3pdf417/ 
+      http://www.geocities.com/ooosawaddee3pdf417/
 
    History:
 
-   22/12/01  pdf417decode          Initial Release 
+   22/12/01  pdf417decode          Initial Release
    23/12/01  pdf417decode rev 1.1  Added a test to see if fopen() suceeded.
    07/03/04  pdf417decode rev 2.0  Decoding routines heavily modified.
                                    Fixed start-of-row symbol problem.
@@ -37,7 +37,8 @@
 
 
 #include <stdio.h>
-#include <pbm.h>
+#include <string.h>
+#include "pbm.h"
 
 
 /* You may have to play with these numbers, depending on your scan quality */
@@ -49,7 +50,7 @@ typedef unsigned int UInt32;
 typedef int Int32;
 
 /*  You'd better be using gcc, or else an Alpha, or something
- *  Your compiler needs to understand that "long long" is 64 bits (gcc does) 
+ *  Your compiler needs to understand that "long long" is 64 bits (gcc does)
  *  in order to compile it.
  */
 
@@ -76,7 +77,7 @@ void convert_num(int *cw, int len);
 
 extern int eras_dec_rs(int data[], int eras_pos[], int no_eras,
                        int data_len, int synd_len);
-                
+
 
 
 /*-----------------------------------------------------------------*/
@@ -101,7 +102,7 @@ static int bestham(int word, int which) {
 
 
 static void add_codeword(int word) {
-    static int len = 0;
+    /*static int len = 0;*/
     static int sorow = 0;  /* start of row */
     static int skip = 0;
 
@@ -110,9 +111,9 @@ static void add_codeword(int word) {
 	return;
     }
 
-    if (numouts == 0) {
-	len = word;  /* not really used, but stored as codewords[0] */
-    }
+    /*if (numouts == 0) {
+	len = word;  // not really used, but stored as codewords[0]
+    }*/
 
     if ((word & 0xffffff) == 0x030000) {  /* start sequence */
     //if ((word & 0xff00000) == 0x2000000) {  /* start sequence */
@@ -155,7 +156,7 @@ static void decode_codewords() {
     Int32 segment[34*90];  /* single compaction segment to be decoded */
 
     if (numouts == 0) return;
-    
+
     len = codewords[0];
     if (len == 0) return;
 
@@ -163,48 +164,48 @@ static void decode_codewords() {
 
     mode = 900;    /* default mode is Text Compaction */
     shift = mode;
-    
+
     for (i = 1; i < len; ++i) {
         cw = codewords[i];
         if (cw >= 900) {
-        
+
             if (slen > 0) decode_segment(segment, slen, mode);
             slen = 0;
-            
+
             switch (cw) {
             case 900:  /* mode latch to Text Compaction mode */
             case 901:  /* mode latch to Byte Compaction */
             case 902:  /* mode latch to Numeric Compaction */
 		mode = shift = cw;
 		break;
-		
+
             case 913:  /* mode shift to Byte Compaction */
             	shift = cw;
             	break;
-            
+
             case 921:  /* reader initialization */
             	break;
-            	
+
             case 922:  /* terminator codeword for Macro PDF control block */
                 break;
-                
+
             case 923:  /* Begin of optional fields in the Macro PDF control block */
                 break;
-                
+
             case 924:  /* mode latch to Byte Compaction (num of encoded bytes
                           is an integer multiple of 6) */
                 mode = shift = cw;
                 break;
-                
+
             case 925:  /* identifier for a user defined Extended Channel
                           Interpretation (ECI) */
             case 926:  /* identifier for a general purpose ECI format */
             case 927:  /* identifier for an ECI of a character set or code page */
                 break;
-                
+
             case 928:  /* Begin of a Macro PDF Control Block */
                 break;
-                
+
             default:
                 fprintf(stderr, "Unknown mode %d\n", cw);
                 break;
@@ -213,7 +214,7 @@ static void decode_codewords() {
 	}
 
 	segment[slen++] = cw;
-	
+
 	if (shift != mode) {
 	    if (slen > 0) decode_segment(segment, slen, shift);
 	    slen = 0;
@@ -231,13 +232,13 @@ void decode_segment(int *cw, int len, int mode) {
     case 900:
 	convert_text(cw, len);
 	break;
-	        
+
     case 901:
     case 913:
     case 924:
         convert_byte(cw, len, mode);
     	break;
-	    	
+
     case 902:
         convert_num(cw, len);
     	break;
@@ -264,7 +265,7 @@ void convert_byte(int *cw, int len, int mode) {
 	    codeval *= 900;
 	    codeval += *cw++;
 	}
-    
+
 	if (debug > 1) printf("codeval = %Lx, giving ", codeval);
 
 	for (j = 0; j < 6; ++j) {
@@ -273,14 +274,14 @@ void convert_byte(int *cw, int len, int mode) {
 	    codeval >>= 8;
 	}
 	if (debug > 1) printf("\n");
-	
+
 	if (encfmt) {
 	    for (j = 0; j < 6; ++j) printf("%02X", b[j]);
 	} else {
 	    for (j = 0; j < 6; ++j) printf("%c", b[j]);
 	}
     }
-    
+
     /* remaining codewords, if any, are encoded 1 byte per codeword */
     if (len > 0) {
 	if (debug > 1) printf("remaining %d codewords: ", len);
@@ -289,13 +290,13 @@ void convert_byte(int *cw, int len, int mode) {
 	    if (debug > 1) printf("[%02x] ", b[j]);
         }
 	if (debug > 1) printf("\n");
-	
+
 	if (encfmt) {
 	    for (j = 0; j < len; ++j) printf("%02X", b[j]);
 	} else {
 	    for (j = 0; j < len; ++j) printf("%c", b[j]);
 	}
-	
+
 	codeval = 0;
 	i = 0;
     }
@@ -320,7 +321,7 @@ void convert_text(int *cw, int len) {
     mode = shift = 0;
 
     if (encfmt) printf("TC \"");
-    
+
     for (i = 0; i < len; ++i) {
 
 	c[0] = *cw / 30;
@@ -362,7 +363,7 @@ void convert_text(int *cw, int len) {
 	        cout = txt_punct[c[j]];
 	        break;
 	    }
-    
+
 	    printf("%c", cout);
         }
 
@@ -385,14 +386,14 @@ void convert_text(int *cw, int len) {
 void convert_num(int *cw, int len) {
     int n_bcd[45], cw_bcd[3];
     int i, j, n, res, carry, start;
-    
+
     if (debug > 1) printf("convert_num: %d codewords\n", len);
 
     for ( ; len > 0; len -= 15) {
 
         /* clear the accumulator */
         for (i = 0; i < 45; ++i) n_bcd[i] = 0;
-        
+
         for (i = 0; i < MIN(len, 15); ++i) {
 
 	    /* convert codeword to BCD */
@@ -406,14 +407,14 @@ void convert_num(int *cw, int len) {
 	    /* multiply accumulator by 900 (100 * 9) */
             if (i > 0) {
                 carry = 0;
-        
+
                 /* multiply by 9 */
                 for (j = 0; j < 45; ++j) {
                     res = n_bcd[j] * 9 + carry;
                     n_bcd[j] = res % 10;
                     carry = res / 10;
                 }
-        
+
                 /* multiply by 100 */
                 for (j = 44; j >= 2; --j) {
                     n_bcd[j] = n_bcd[j-2];
@@ -424,7 +425,7 @@ void convert_num(int *cw, int len) {
 
             /* then add the BCD codeword */
             carry = 0;
-    
+
             for (j = 0; j < 3; ++j) {
                 res = n_bcd[j] + cw_bcd[j] + carry;
                 n_bcd[j] = res % 10;
@@ -439,7 +440,7 @@ void convert_num(int *cw, int len) {
         }
 
         start = 0;
-        
+
         if (encfmt) printf("NC \"");
         for (j = 0; j < 45; ++j) {
             if (start) {
@@ -476,7 +477,7 @@ int processrow(int cols, int rownum, int num, double *cumbits) {
 
     for (j = firstblack+1; j < cols; ++j) {
 	if ((cumbits[j] < thresh) != (cumbits[j-1] < thresh)) {
-	    if (nchange > 1 && 
+	    if (nchange > 1 &&
 		(j - firstblack - cumchange[nchange-1]) * 15 < cumchange[1]) {
 		/* Spurious change */
 		--nchange;
@@ -492,7 +493,7 @@ int processrow(int cols, int rownum, int num, double *cumbits) {
         }
         printf("\n");
     }
-    
+
     if (nchange < 8) return 0;
 
     for (j = 0; j < nchange-8; j += 8) {
@@ -531,7 +532,7 @@ int main(int argc, char **argv) {
     char *myname = argv[0];
 
     for (i = 0; i < 15; ++i) mask[i] = 1 << (15-i);
-    
+
     for ( ; argc > 1; --argc, ++argv) {
         if (strcmp(argv[1], "-d") == 0)
             ++debug;
@@ -545,7 +546,7 @@ int main(int argc, char **argv) {
             break;
     }
     pbm_init(&argc, argv);
-    
+
     if (argc > 1) {
       pf = fopen(argv[1], "r");
     } else {
@@ -557,7 +558,7 @@ int main(int argc, char **argv) {
       fprintf(stderr, "%s: could not open file: %s\n", myname, argv[1]);
       exit(1);
     }
- 
+
     bits = pbm_readpbm(pf, &cols, &rows);
     fclose(pf);
 
@@ -604,7 +605,7 @@ int main(int argc, char **argv) {
 	else if (num > 0)
 	    printf("%d codewords corrected\n\n", num);
     }
-    
+
     decode_codewords();
 
     pbm_freearray(bits, rows);
