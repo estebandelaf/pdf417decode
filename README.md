@@ -4,6 +4,11 @@ Pdf417decode
 This is a fork of the project available in
 <http://sourceforge.net/projects/pdf417decode>.
 
+Require
+-------
+
+- Netpbm library (in Debian GNU/Linux: libnetpbm9-dev)
+
 Usage
 -----
 
